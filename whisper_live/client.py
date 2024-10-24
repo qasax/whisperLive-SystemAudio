@@ -37,7 +37,8 @@ class Client:
             model="small",
             srt_file_path="output.srt",
             use_vad=True,
-            log_transcription=True
+            log_transcription=True,
+            msg_callback=None
     ):
         """
         Initializes a Client instance for audio recording and streaming to a server.
@@ -66,7 +67,7 @@ class Client:
         self.last_segment = None
         self.last_received_segment = None
         self.log_transcription = log_transcription
-
+        self.msg_callback = msg_callback
         if translate:
             self.task = "translate"
 
@@ -131,6 +132,9 @@ class Client:
             text = text[-3:]
             utils.clear_screen()
             utils.print_transcript(text)
+        # 调用回调函数更新WebClient实例的message
+        if self.msg_callback:
+            self.msg_callback(' '.join(text[-3:]))
 
     def on_message(self, ws, message):
         """
@@ -746,9 +750,10 @@ class TranscriptionClient(TranscriptionTeeClient):
             output_recording_filename="./output_recording.wav",
             output_transcription_path="./output.srt",
             log_transcription=True,
+            msg_callback=None
     ):
         self.client = Client(host, port, lang, translate, model, srt_file_path=output_transcription_path,
-                             use_vad=use_vad, log_transcription=log_transcription)
+                             use_vad=use_vad, log_transcription=log_transcription,msg_callback=msg_callback)
         if save_output_recording and not output_recording_filename.endswith(".wav"):
             raise ValueError(f"Please provide a valid `output_recording_filename`: {output_recording_filename}")
         if not output_transcription_path.endswith(".srt"):
