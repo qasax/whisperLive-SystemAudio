@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>实时输出</h1>
+    <pre id="output"></pre>
+    <script>
+        const outputElement = document.getElementById('output');
+        const output = { value: '' };  // 创建一个对象来存储输出
+
+        Object.defineProperty(output, 'value', {
+            set: function(newValue) {
+                outputElement.innerText = newValue;  // 更新显示内容
+            }
+        });
+
+        function fetchOutput() {
+            window.pywebview.api.get_message().then(function(response) {
+                output.value = response;  // 更新输出
+            });
+        }
+
+        setInterval(fetchOutput, 1000);  // 每秒请求一次
+    </script>
+</body>
+</html>

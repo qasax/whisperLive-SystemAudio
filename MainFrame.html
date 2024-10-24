@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>实时输出</title>
+</head>
+<body>
+<button onclick="runserver()">runserver</button>
+<button onclick="runclient()">runclient</button>
+<script>
+    function runserver(){
+        window.pywebview.api.run_server('9090','faster_whisper',
+            'C:\\projects\\pythonProjects\\WhisperLive-main\\model\\models--Systran--faster-whisper-tiny\\snapshots\\d90ca5fe260221311c53c58e660288d3deb8d356',
+        'None','False','True')
+    }
+    function runclient(){
+        window.pywebview.api.run_client('9090','zh')
+        window.pywebview.api.showSubtitle()
+    }
+</script>
+</body>
+</html>
