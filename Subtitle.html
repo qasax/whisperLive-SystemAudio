@@ -2,28 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字幕悬浮窗</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Subtitle.css">
 </head>
 <body>
-    <h1>实时输出</h1>
-    <pre id="output"></pre>
-    <script>
-        const outputElement = document.getElementById('output');
-        const output = { value: '' };  // 创建一个对象来存储输出
-
-        Object.defineProperty(output, 'value', {
-            set: function(newValue) {
-                outputElement.innerText = newValue;  // 更新显示内容
-            }
-        });
-
-        function fetchOutput() {
-            window.pywebview.api.get_message().then(function(response) {
-                output.value = response;  // 更新输出
-            });
-        }
-
-        setInterval(fetchOutput, 1000);  // 每秒请求一次
-    </script>
+<div class="floating-window" id="floatingWindow">
+    <div class="buttons" id="buttons">
+        <button onclick="topWindow()">置顶</button>
+        <button onclick="closeWindow()">关闭</button>
+    </div>
+    <div class="subtitle" id="subtitle">这是一个悬浮字幕窗</div>
+</div>
+<script src="script.js"></script>
 </body>
 </html>

@@ -59,10 +59,16 @@ def on_start():
     subtitleWindow.hide()
 
 
+def move_window(x, y):
+    print(x)
+    subtitleWindow.move(int(x), int(y))
+
+
 initServerAndClient = InitServerAndClient()
 
 mainWindow = webview.create_window('', url='MainFrame.html', js_api=initServerAndClient)
-subtitleWindow = webview.create_window('', url='Subtitle.html', frameless=True, easy_drag=True,
+subtitleWindow = webview.create_window('', url='Subtitle.html', frameless=True, easy_drag=True, resizable=True,
                                        js_api=initServerAndClient)
 mainWindow.expose(showSubtitle)
+subtitleWindow.expose(move_window)
 webview.start(on_start)
