@@ -1,7 +1,10 @@
+import time
+
 import webview
 from whisper_live.client import TranscriptionClient
 from whisper_live.server import TranscriptionServer
 import threading
+import pyautogui
 
 
 class InitServerAndClient:
@@ -51,24 +54,45 @@ class InitServerAndClient:
         self.message = msg
 
 
+def showWindow(window):
+    window.show()
+
+
+def hideWindow(window):
+    window.hide()
+
+
+def destroy(window):
+    # show the window for a few seconds before destroying it:
+    time.sleep(0.2)
+    print('Destroying window..')
+    window.destroy()
+    print('Destroyed!')
+
+
+def hideSubtitle():
+    print(123)
+    hideWindow(subtitleWindow)
+
+
 def showSubtitle():
-    subtitleWindow.show()
+    print(123)
+    showWindow(subtitleWindow)
 
 
 def on_start():
-    subtitleWindow.hide()
+    hideSubtitle()
 
 
-def move_window(x, y):
-    print(x)
-    subtitleWindow.move(int(x), int(y))
-
-
+screen_width, screen_height = pyautogui.size()
 initServerAndClient = InitServerAndClient()
-
-mainWindow = webview.create_window('', url='MainFrame.html', js_api=initServerAndClient)
-subtitleWindow = webview.create_window('', url='Subtitle.html', frameless=True, easy_drag=True, resizable=True,
-                                       js_api=initServerAndClient)
+mainWindow = webview.create_window('Main', url='MainFrame.html', js_api=initServerAndClient)
+subtitleWindow = webview.create_window('Subtitle', url='Subtitle.html', width=int(int(screen_width)*0.3),
+                                       height=int(int(screen_height)*0.15),frameless=True, easy_drag=True,
+                                       on_top=True,js_api=initServerAndClient)
+# 分配方法
 mainWindow.expose(showSubtitle)
-subtitleWindow.expose(move_window)
-webview.start(on_start)
+mainWindow.expose(destroy)
+subtitleWindow.expose(hideSubtitle)
+# 启动窗口
+webview.start(on_start, debug=True)

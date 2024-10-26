@@ -36,25 +36,20 @@ function topWindow() {
 function closeWindow() {
     floatingWindow.style.display = 'none';
 }
+//隐藏窗口
+function hideSubtitle(){
+console.log("hideSubtitle")
+window.pywebview.api.hideSubtitle()
+}
+//置顶窗口
+var isTop=True
+function topSubtitle(){
+if (isTop){
+isTop=!isTop
+window.pywebview.api.topSubtitle(isTop)
+}else{
+isTop=!isTop
+window.pywebview.api.topSubtitle(isTop)
+}
 
-    // 实现拖动窗口
-    let isMouseDown = false;
-    let offset = { x: 0, y: 0 };
-
-    document.body.addEventListener('mousedown', (e) => {
-        isMouseDown = true;
-        offset.x = e.clientX;
-        offset.y = e.clientY;
-    });
-
-    document.body.addEventListener('mousemove', (e) => {
-        if (isMouseDown) {
-            const x = e.screenX - offset.x;
-            const y = e.screenY - offset.y;
-            window.pywebview.api.move_window(x, y);
-        }
-    });
-
-    document.body.addEventListener('mouseup', () => {
-        isMouseDown = false;
-    });
+}
