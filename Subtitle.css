@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%; /* 使内容宽度充满 */
+    height: 100%; /* 使内容高度充满 */
+    background: #f0f0f0;
+}
+
+.floating-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    transition: all 0.3s;
+    font-family: 'Roboto', sans-serif;
+}
+
+.subtitle {
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    opacity: 0; /* 默认隐藏按钮 */
+    transition: opacity 0.3s;
+}
+
+.floating-window:hover .buttons {
+    opacity: 1; /* 鼠标悬停时显示按钮 */
+}
+
+button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 1em;
+}
+
+button:hover {
+    text-decoration: underline;
+}
