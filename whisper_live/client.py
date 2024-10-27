@@ -134,7 +134,7 @@ class Client:
             utils.print_transcript(text)
         # 调用回调函数更新WebClient实例的message
         if self.msg_callback:
-            self.msg_callback.put(' '.join(text[-3:]))
+            self.msg_callback.put(' '.join(text[-2:]))
 
     def on_message(self, ws, message):
         """
@@ -304,8 +304,8 @@ class TranscriptionTeeClient:
         self.p = pyaudio.PyAudio()
         # 系统音频对象
         self.speMic = sc.get_microphone(id=sc.default_speaker().name, include_loopback=True)
-        #录制的采样率
-        self.record_sample_rate = 48000
+        # 录制的采样率
+        self.record_sample_rate = 16000
         try:
             self.stream = self.p.open(
                 format=self.format,
@@ -572,8 +572,8 @@ class TranscriptionTeeClient:
                 self.frames += data
                 audio_array = self.bytes_to_float_array(data)
                 print(audio_array.dtype)
-                #print(audio_array)
-                #print(len(audio_array))
+                # print(audio_array)
+                # print(len(audio_array))
 
                 self.multicast_packet(audio_array.tobytes())
 
@@ -608,18 +608,20 @@ class TranscriptionTeeClient:
             os.makedirs("chunks")
         try:
             with self.speMic.recorder(self.record_sample_rate) as mc:
-                for _ in range(0, int(self.rate / self.chunk * self.record_seconds)):
+                for _ in range(0,
+                               int(self.record_sample_rate / self.chunk * self.record_sample_rate / self.rate * self.record_seconds)):
                     if not any(client.recording for client in self.clients):
                         break
-                    fcNumpy = mc.record(numframes=self.chunk*self.record_sample_rate/self.rate)
-                    #print(fcNumpy.shape)
+                    fcNumpy = mc.record(numframes=self.chunk * self.record_sample_rate / self.rate)
+                    # print(fcNumpy.shape)
                     if len(fcNumpy.shape) == 2:
                         # Convert stereo to mono by averaging across channels
-                        audio_data_mono  = np.mean(fcNumpy, axis=1)
+                        audio_data_mono = np.mean(fcNumpy, axis=1)
                     else:
-                        audio_data_mono  = fcNumpy  # Audio is already mono
-                    resampled_data = librosa.resample(audio_data_mono, orig_sr=self.record_sample_rate, target_sr=self.rate)
-                    #print(resampled_data.shape)
+                        audio_data_mono = fcNumpy  # Audio is already mono
+                    resampled_data = librosa.resample(audio_data_mono, orig_sr=self.record_sample_rate,
+                                                      target_sr=self.rate)
+                    # print(resampled_data.shape)
                     self.frames += resampled_data.tobytes()
 
                     self.multicast_packet(resampled_data.tobytes())
@@ -753,7 +755,7 @@ class TranscriptionClient(TranscriptionTeeClient):
             msg_callback=None
     ):
         self.client = Client(host, port, lang, translate, model, srt_file_path=output_transcription_path,
-                             use_vad=use_vad, log_transcription=log_transcription,msg_callback=msg_callback)
+                             use_vad=use_vad, log_transcription=log_transcription, msg_callback=msg_callback)
         if save_output_recording and not output_recording_filename.endswith(".wav"):
             raise ValueError(f"Please provide a valid `output_recording_filename`: {output_recording_filename}")
         if not output_transcription_path.endswith(".srt"):

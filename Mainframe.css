@@ -2,8 +2,9 @@
 body {
     font-family: Arial, sans-serif; /* 字体样式 */
     background-color: #f9f9f9; /* 背景颜色 */
-    margin: 0;
+    margin: auto;
     padding: 20px; /* 内边距 */
+    width: 80vw;
 }
 
 /* 表单样式 */
@@ -47,6 +48,14 @@ input[type="checkbox"] {
     margin-right: 32%;
 }
 
+select {
+    flex: 2; /* 输入框占据 2/3 的宽度 */
+    padding: 10px; /* 内边距 */
+    border: 1px solid #ccc; /* 边框样式 */
+    border-radius: 4px; /* 边框圆角 */
+    font-size: 14px; /* 字体大小 */
+}
+
 /* 按钮样式 */
 button {
     width: 100%; /* 按钮占据整行 */
@@ -64,6 +73,15 @@ button:hover {
     background-color: #45a049; /* 悬停时背景颜色变化 */
 }
 
+/* 禁用状态样式 */
+button:disabled {
+    background-color: #cccccc; /* 禁用状态背景颜色 */
+    color: #666666; /* 禁用状态字体颜色 */
+    cursor: not-allowed; /* 禁用状态下光标显示为禁止图标 */
+    opacity: 0.6; /* 添加透明度以示禁用状态 */
+}
+
+
 /* 响应式设计 */
 @media (max-width: 600px) {
     .form-row {
@@ -80,3 +98,48 @@ button:hover {
         width: 100%; /* 输入框宽度为100% */
     }
 }
+        /* 页签栏的样式 */
+        .tab-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f1f1f1;
+            padding: 10px 0;
+        }
+
+        /* 每个页签的样式 */
+        .tab {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #333;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* 页签未选中的样式 */
+        .tab:not(.active) {
+            background-color: #f9f9f9;
+        }
+
+        /* 页签选中时的阴影效果 */
+        .tab.active {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* 页签栏的布局 */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* 显示当前选中页签内容 */
+        .tab-content.active {
+            display: block;
+        }

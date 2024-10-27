@@ -28,10 +28,11 @@ def run_server(port, backend, faster_whisper_custom_model_path, whisper_tensorrt
         print(f"Server encountered an error: {e}")
 
 
-def run_client(port, lang, translate, model, use_vad, save_output_recording, output_recording_filename, message_queue):
+def run_client(serverip,port, lang, translate, model, use_vad, save_output_recording, output_recording_filename, message_queue,
+               type):
     """客户端运行逻辑，作为独立进程运行"""
     client = TranscriptionClient(
-        "localhost",
+        serverip,
         port=int(port),
         lang=lang,
         translate=translate,
@@ -41,12 +42,12 @@ def run_client(port, lang, translate, model, use_vad, save_output_recording, out
         output_recording_filename=output_recording_filename,
         msg_callback=message_queue  # 使用消息队列传递消息
     )
-
-    # 可以添加条件以允许优雅退出
-    try:
+    if type == 'speak':
+        print("系统音频转录")
         client(wasapi=True)
-    except Exception as e:
-        print(f"Client encountered an error: {e}")
+    else:
+        print("麦克风音频转录")
+        client()
 
 
 class InitServerAndClient:
@@ -76,14 +77,14 @@ class InitServerAndClient:
         )
         self.server_process.start()
 
-    def start_client(self, port=9090, lang='zh', translate=False, model="small", use_vad=False,
+    def start_client(self,serverip="localhost", port=9090, lang='zh', translate=False, model="small", use_vad=False,
                      save_output_recording=True,
-                     output_recording_filename="./output_recording.wav", ):
+                     output_recording_filename="./output_recording.wav", type='speak'):
         """启动客户端进程"""
         self.client_process = multiprocessing.Process(
             target=run_client,
-            args=(int(port), lang, translate, model, use_vad, save_output_recording, output_recording_filename,
-                  message_queue),
+            args=(serverip,int(port), lang, translate, model, use_vad, save_output_recording, output_recording_filename,
+                  message_queue, type),
             name='client_process',
             daemon=True
         )
@@ -154,14 +155,21 @@ if __name__ == '__main__':
     message_queue = multiprocessing.Queue()  # 用于进程间传递消息
     screen_width, screen_height = pyautogui.size()
     initServerAndClient = InitServerAndClient()
-    mainWindow = webview.create_window('Main', url='MainFrame.html', js_api=initServerAndClient, confirm_close=True)
-    subtitleWindow = webview.create_window('Subtitle', url='Subtitle.html', width=int(int(screen_width) * 0.3),
-                                           height=int(int(screen_height) * 0.15), frameless=True,
+    mainWindow = webview.create_window('Main', url='MainFrame.html', width=int(int(screen_width) * 0.6),
+                                       height=int(int(screen_height) * 0.7), js_api=initServerAndClient,
+                                       confirm_close=True)
+    subtitleWidth = int(int(screen_width) * 0.3)
+    subtitleHeight = int(int(screen_height) * 0.15)
+    subtitleX = (screen_width - subtitleWidth) // 2
+    subtitleY = screen_height - subtitleHeight - (screen_height // 100 * 5)
+    subtitleWindow = webview.create_window('Subtitle', url='Subtitle.html', width=subtitleWidth,
+                                           height=subtitleHeight, x=subtitleX, y=subtitleY, frameless=True,
                                            on_top=True, js_api=initServerAndClient)
     # 分配方法
     mainWindow.expose(showSubtitle)
+    mainWindow.expose(hideSubtitle)
     mainWindow.events.closed += exit
     subtitleWindow.expose(hideSubtitle)
     subtitleWindow.expose(topSubtitle)
     # 启动窗口
-    webview.start(on_start, debug=True)
+    webview.start(on_start, debug=False)
