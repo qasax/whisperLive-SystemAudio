@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     from whisper_live.server import TranscriptionServer
     server = TranscriptionServer()
+    print(args.port,args.backend,args.faster_whisper_custom_model_path,args.trt_model_path,args.trt_multilingual,args.omp_num_threads,args.no_single_model)
     server.run(
         "0.0.0.0",
         port=args.port,

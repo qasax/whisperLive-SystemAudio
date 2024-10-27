@@ -6,16 +6,96 @@
     <link rel="stylesheet" href="MainFrame.css">
 </head>
 <body>
-<button onclick="runserver()">runserver</button>
-<button onclick="runclient()">runclient</button>
+<form id="serverForm">
+    <div class="form-row">
+        <label for="serverPort">端口号:</label>
+        <input type="number" id="serverPort" name="serverPort" value="9090">
+    </div>
+    <div class="form-row">
+        <label for="backend">转录模型:</label>
+        <input type="text" id="backend" name="backend" value="faster_whisper">
+    </div>
+    <div class="form-row">
+        <label for="faster_whisper_custom_model_path">Faster Whisper 路径:</label>
+        <input type="text" id="faster_whisper_custom_model_path" name="faster_whisper_custom_model_path" value="./model/models--Systran--faster-whisper-tiny/snapshots/d90ca5fe260221311c53c58e660288d3deb8d356">
+    </div>
+    <div class="form-row">
+        <label for="whisper_tensorrt_path">Whisper TensorRT 路径:</label>
+        <input type="text" id="whisper_tensorrt_path" name="whisper_tensorrt_path" value="">
+    </div>
+    <div class="form-row">
+        <label for="trt_multilingual">TRT 多语言:</label>
+        <input type="checkbox" id="trt_multilingual" name="trt_multilingual">
+    </div>
+    <div class="form-row">
+        <label for="single_model">单模型:</label>
+        <input type="checkbox" id="single_model" name="single_model" checked>
+    </div>
+    <button type="button" onclick="runserver()">启动服务器</button>
+</form>
+
+<form id="clientForm">
+    <div class="form-row">
+        <label for="clientPort">端口号:</label>
+        <input type="text" id="clientPort" name="clientPort" value="9090">
+    </div>
+    <div class="form-row">
+        <label for="lang">源语言:</label>
+        <input type="text" id="lang" name="lang" value="zh">
+    </div>
+    <div class="form-row">
+        <label for="translate">是否翻译:</label>
+        <input type="checkbox" id="translate" name="model" value="small">
+    </div>
+    <div class="form-row">
+        <label for="model">转录模型:</label>
+        <input type="text" id="model" name="model" value="small">
+    </div>
+    <div class="form-row">
+        <label for="use_vad">语音活动检测:</label>
+        <input type="checkbox" id="use_vad" name="use_vad">
+    </div>
+    <div class="form-row">
+        <label for="save_output_recording">保存音频文件:</label>
+        <input type="checkbox" id="save_output_recording" name="save_output_recording" value="True" checked>
+    </div>
+    <div class="form-row">
+        <label for="output_recording_filename">保存目录:</label>
+        <input type="text" id="output_recording_filename" name="output_recording_filename" value="./output_recording.wav">
+    </div>
+    <button onclick="runclient()">启动转录</button>
+</form>
+
+
 <script>
-    function runserver(){
-        window.pywebview.api.run_server('9090','faster_whisper',
-            'C:\\projects\\pythonProjects\\WhisperLive-main\\model\\models--Systran--faster-whisper-tiny\\snapshots\\d90ca5fe260221311c53c58e660288d3deb8d356',
-        'None','False','True')
+    function runserver() {
+        let port = document.getElementById('serverPort').value;
+        let backend = document.getElementById('backend').value;
+        let faster_whisper_custom_model_path = document.getElementById('faster_whisper_custom_model_path').value;
+        let whisper_tensorrt_path = document.getElementById('whisper_tensorrt_path').value;
+        let trt_multilingual = document.getElementById('trt_multilingual').checked;
+        let single_model = document.getElementById('single_model').checked;
+        if(port=='') port=9090
+        if (backend=='') backend="faster_whisper"
+        if(faster_whisper_custom_model_path=='') faster_whisper_custom_model_path='None';
+        if(whisper_tensorrt_path=='') whisper_tensorrt_path='None'
+        window.pywebview.api.start_server(port,backend,faster_whisper_custom_model_path,whisper_tensorrt_path,trt_multilingual,single_model)
     }
-    function runclient(){
-        window.pywebview.api.run_client('9090','zh')
+
+    function runclient() {
+        let clientPort = document.getElementById('clientPort').value;
+        let lang = document.getElementById('lang').value;
+        let translate = document.getElementById('translate').checked;
+        let model = document.getElementById('model').value;
+        let use_vad = document.getElementById('use_vad').checked;
+        let save_output_recording = document.getElementById('save_output_recording').checked;
+        let output_recording_filename = document.getElementById('output_recording_filename').value
+        if(clientPort=='') clientPort=9090
+        if(lang=='') lang='zh'
+        if(model=='') model='small'
+        if(output_recording_filename=='') output_recording_filename="./output_recording.wav"
+        window.pywebview.api.start_client(clientPort, lang, translate, model, use_vad, save_output_recording, output_recording_filename)
+        window.pywebview.api.listen_msg()
         window.pywebview.api.showSubtitle()
     }
 </script>

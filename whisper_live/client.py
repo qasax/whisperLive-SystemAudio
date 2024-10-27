@@ -134,7 +134,7 @@ class Client:
             utils.print_transcript(text)
         # 调用回调函数更新WebClient实例的message
         if self.msg_callback:
-            self.msg_callback(' '.join(text[-3:]))
+            self.msg_callback.put(' '.join(text[-3:]))
 
     def on_message(self, ws, message):
         """
