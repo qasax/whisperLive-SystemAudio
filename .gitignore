@@ -1,2 +1,4 @@
 /desktop/model/
 /chunks/
+__pycache__/
+*.pyc
