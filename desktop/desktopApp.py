@@ -4,7 +4,7 @@ from whisper_live.client import TranscriptionClient
 from whisper_live.server import TranscriptionServer
 import threading
 import pyautogui
-
+import json
 import multiprocessing
 import os
 import time
@@ -28,7 +28,8 @@ def run_server(port, backend, faster_whisper_custom_model_path, whisper_tensorrt
         print(f"Server encountered an error: {e}")
 
 
-def run_client(serverip,port, lang, translate, model, use_vad, save_output_recording, output_recording_filename, message_queue,
+def run_client(serverip, port, lang, translate, model, use_vad, save_output_recording, output_recording_filename,
+               message_queue,
                type):
     """客户端运行逻辑，作为独立进程运行"""
     client = TranscriptionClient(
@@ -68,6 +69,7 @@ class InitServerAndClient:
         if "OMP_NUM_THREADS" not in os.environ:
             os.environ["OMP_NUM_THREADS"] = str(1)
         """启动服务器进程"""
+        print(port, backend, faster_whisper_custom_model_path, whisper_tensorrt_path, trt_multilingual, single_model)
         self.server_process = multiprocessing.Process(
             target=run_server,
             args=(
@@ -77,14 +79,16 @@ class InitServerAndClient:
         )
         self.server_process.start()
 
-    def start_client(self,serverip="localhost", port=9090, lang='zh', translate=False, model="small", use_vad=False,
+    def start_client(self, serverip="localhost", port=9090, lang='zh', translate=False, model="small", use_vad=False,
                      save_output_recording=True,
                      output_recording_filename="./output_recording.wav", type='speak'):
         """启动客户端进程"""
+        print(serverip, port, lang, translate, model, use_vad, save_output_recording, output_recording_filename, type)
         self.client_process = multiprocessing.Process(
             target=run_client,
-            args=(serverip,int(port), lang, translate, model, use_vad, save_output_recording, output_recording_filename,
-                  message_queue, type),
+            args=(
+                serverip, int(port), lang, translate, model, use_vad, save_output_recording, output_recording_filename,
+                message_queue, type),
             name='client_process',
             daemon=True
         )
@@ -95,15 +99,15 @@ class InitServerAndClient:
         threading.Thread(target=self.get_msg, args=(element,), daemon=True, name="listen_msg thread").start()
 
     def get_msg(self, element):
+        self.listen_msg_flag = True
         print("开始监听消息")
         while self.listen_msg_flag:
             try:
                 # 尝试获取消息
                 message = message_queue.get_nowait()
-                print(f"Consuming: {message}")
                 if message is not None:
-                    print("消息" + message)
-                    element.text = message
+                    print("转译结果： " + message)
+                    element.text = message.replace("'", "\\'")
             except _queue.Empty:
                 # 如果队列为空，暂停一段时间以避免过度占用CPU
                 time.sleep(0.5)
@@ -155,14 +159,14 @@ if __name__ == '__main__':
     message_queue = multiprocessing.Queue()  # 用于进程间传递消息
     screen_width, screen_height = pyautogui.size()
     initServerAndClient = InitServerAndClient()
-    mainWindow = webview.create_window('Main', url='MainFrame.html', width=int(int(screen_width) * 0.6),
+    mainWindow = webview.create_window('Main', url='./mainFrame/MainFrame.html', width=int(int(screen_width) * 0.6),
                                        height=int(int(screen_height) * 0.7), js_api=initServerAndClient,
                                        confirm_close=True)
     subtitleWidth = int(int(screen_width) * 0.3)
     subtitleHeight = int(int(screen_height) * 0.15)
     subtitleX = (screen_width - subtitleWidth) // 2
     subtitleY = screen_height - subtitleHeight - (screen_height // 100 * 5)
-    subtitleWindow = webview.create_window('Subtitle', url='Subtitle.html', width=subtitleWidth,
+    subtitleWindow = webview.create_window('Subtitle', url='./subtitle/Subtitle.html', width=subtitleWidth,
                                            height=subtitleHeight, x=subtitleX, y=subtitleY, frameless=True,
                                            on_top=True, js_api=initServerAndClient)
     # 分配方法
